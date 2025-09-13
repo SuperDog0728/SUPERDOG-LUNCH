@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>午餐选择轮盘</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            padding: 20px;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            max-width: 600px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .wheel-container {
+            position: relative;
+            width: 450px;
+            height: 450px;
+            margin: 20px 0;
+        }
+        
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            border: 10px solid #2c3e50;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+            background: #fff;
+            transition: transform 4s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        }
+        
+        .section {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: bottom right;
+            left: 0;
+            top: 0;
+            text-align: center;
+            padding-top: 30%;
+            font-weight: bold;
+            color: #2c3e50;
+            user-select: none;
+            font-size: 14px;
+            overflow: hidden;
+        }
+        
+        .pointer {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 70px;
+            background: #e74c3c;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            z-index: 10;
+            filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.7));
+        }
+        
+        .pointer::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            height: 10px;
+            background: #c0392b;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+        
+        .stand {
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background: #7f8c8d;
+            border-radius: 50%;
+            z-index: 5;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 16px 35px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(2px);
+        }
+        
+        #spin-btn {
+            background: linear-gradient(to right, #27ae60, #2ecc71);
+        }
+        
+        #reset-btn {
+            background: linear-gradient(to right, #2980b9, #3498db);
+        }
+        
+        .result {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px 45px;
+            border-radius: 15px;
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            min-width: 350px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+            transition: all 0.5s;
+        }
+        
+        .highlight {
+            animation: highlight 1s ease-in-out infinite;
+            background: linear-gradient(to right, #ffeaa7, #fab1a0);
+            color: #d35400;
+        }
+        
+        @keyframes highlight {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .wheel-info {
+            color: white;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        @media (max-width: 600px) {
+            .wheel-container {
+                width: 320px;
+                height: 320px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            button {
+                padding: 14px 25px;
+                font-size: 1rem;
+            }
+            
+            .result {
+                font-size: 1.3rem;
+                min-width: 280px;
+                padding: 20px;
+            }
+            
+            .section {
+                font-size: 12px;
+                padding-top: 35%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>午餐选择轮盘</h1>
+        <p class="description">点击"开始旋转"按钮，让轮盘帮你决定今天午餐吃什么！</p>
+        
+        <div class="wheel-container">
+            <div class="wheel" id="wheel">
+                <!-- 轮盘分区将由JavaScript生成 -->
+            </div>
+            <div class="pointer"></div>
+            <div class="stand"></div>
+        </div>
+        
+        <div class="controls">
+            <button id="spin-btn">
+                <span>开始旋转</span>
+            </button>
+            <button id="reset-btn">
+                <span>重置</span>
+            </button>
+        </div>
+        
+        <div class="result" id="result">
+            等待旋转...
+        </div>
+        
+        <p class="wheel-info">此转盘包含14种午餐选项，每次旋转随机选择</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const wheel = document.getElementById('wheel');
+            const spinBtn = document.getElementById('spin-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const resultElement = document.getElementById('result');
+            
+            // 14种午餐选项
+            const lunchOptions = [
+                "中式炒面", "披萨", "寿司", "汉堡", 
+                "沙拉", "烤肉", "汤面", "三明治", 
+                "炒饭", "意大利面", "炸鸡", "饺子", 
+                "卷饼", "火锅"
+            ];
+            
+            // 14个分区的颜色
+            const colors = [
+                '#FF9AA2', '#FFB7B2', '#FFDAC1', '#E2F0CB', 
+                '#B5EAD7', '#C7CEEA', '#F8B195', '#F67280', 
+                '#C06C84', '#6C5B7B', '#355C7D', '#99B898', 
+                '#FECEAB', '#FF847C'
+            ];
+            
+            const sectionAngle = 360 / 14;
+            
+            // 创建14个分区
+            for (let i = 0; i < 14; i++) {
+                const section = document.createElement('div');
+                section.className = 'section';
+                section.style.backgroundColor = colors[i];
+                section.style.transform = `rotate(${i * sectionAngle}deg)`;
+                
+                // 添加文字
+                const textSpan = document.createElement('span');
+                textSpan.textContent = lunchOptions[i];
+                section.appendChild(textSpan);
+                
+                wheel.appendChild(section);
+            }
+            
+            let isSpinning = false;
+            let currentRotation = 0;
+            
+            // 旋转函数
+            function spinWheel() {
+                if (isSpinning) return;
+                
+                isSpinning = true;
+                resultElement.textContent = "旋转中...";
+                resultElement.classList.remove('highlight');
+                
+                // 随机旋转角度（5-10圈 + 随机停止位置）
+                const extraSpins = 5 + Math.floor(Math.random() * 6);
+                const randomSection = Math.floor(Math.random() * 14);
+                const stopPosition = extraSpins * 360 + randomSection * sectionAngle;
+                
+                // 随机持续时间（3-6秒）
+                const randomDuration = 3 + Math.random() * 3;
+                
+                // 设置动画
+                wheel.style.transition = `transform ${randomDuration}s cubic-bezier(0.45, 0.05, 0.55, 0.95)`;
+                wheel.style.transform = `rotate(${stopPosition}deg)`;
+                
+                // 更新当前旋转角度
+                currentRotation = stopPosition % 360;
+                
+                // 在旋转结束后显示结果
+                setTimeout(() => {
+                    // 计算指针指向的区域（0-13）
+                    const normalizedRotation = (360 - currentRotation) % 360;
+                    const winningSection = Math.floor(normalizedRotation / sectionAngle);
+                    
+                    resultElement.textContent = `今天午餐吃: ${lunchOptions[winningSection]}`;
+                    resultElement.classList.add('highlight');
+                    
+                    isSpinning = false;
+                }, randomDuration * 1000);
+            }
+            
+            // 重置函数
+            function resetWheel() {
+                if (isSpinning) return;
+                
+                wheel.style.transition = 'transform 1s ease-out';
+                wheel.style.transform = 'rotate(0deg)';
+                resultElement.textContent = "等待旋转...";
+                resultElement.classList.remove('highlight');
+                currentRotation = 0;
+                
+                setTimeout(() => {
+                    wheel.style.transition = '';
+                }, 1000);
+            }
+            
+            // 添加事件监听器
+            spinBtn.addEventListener('click', spinWheel);
+            resetBtn.addEventListener('click', resetWheel);
+        });
+    </script>
+</body>
+</html>
